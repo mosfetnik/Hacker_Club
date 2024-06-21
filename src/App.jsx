@@ -1,42 +1,90 @@
+import { useState, useEffect } from "react";
 import "./App.css";
+const Weather = () => {
+  const apiKey = "8b83d51101cf7d02f84f8f5fab17ada4";
+  const [city, setCity] = useState("lucknow");
+  const [weatherData, setWeatherData] = useState(null);
 
-function App() {
+  const fetchWeather = async (city) => {
+    try {
+      const response = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`
+      );
+      const data = await response.json();
+      setWeatherData(data);
+    } catch (error) {
+      console.error("Error fetching weather data:", error);
+    }
+  };
+
+  const handleSearch = () => {
+    fetchWeather(city);
+  };
+
+  const handleChange = (e) => {
+    setCity(e.target.value);
+  };
+
+  useEffect(() => {
+    fetchWeather("lucknow");
+  }, []);
+
+  if (!weatherData) {
+    return <div>Loading...</div>;
+  }
+
+  const { name } = weatherData;
+  const { description, icon } = weatherData.weather[0];
+  const { temp, humidity, temp_min, temp_max } = weatherData.main;
+  const { speed } = weatherData.wind;
+
   return (
     <>
-      ;
-      <div className="card">
-        <div className="search">
-          <input type="text" className="searchbar" placeholder="Search" />
-          <button className="btn">
-            <svg
-              stroke="currentColor"
-              fill="currentColor"
-              strokeWidth="0"
-              viewBox="0 0 24 24"
-              height="1.5em"
-              width="1.5em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M10,18c1.846,0,3.543-0.635,4.897-1.688l4.396,4.396l1.414-1.414l-4.396-4.396C17.365,13.543,18,11.846,18,10 c0-4.411-3.589-8-8-8s-8,3.589-8,8S5.589,18,10,18z M10,4c3.309,0,6,2.691,6,6s-2.691,6-6,6s-6-2.691-6-6S6.691,4,10,4z"></path>
-            </svg>
-          </button>
-        </div>
-
-        <div className="weather">
-          <h1 className="city">Weather in Delhi</h1>
-          <h2 className="temp">51° C</h2>
-          <div className="max_min">
-            <h4 className="max_temp">Max Temp : 21</h4>
-            <h4 className="min_temp">Min Temp : 22</h4>
-          </div>
-          <img src="" alt="icon not found" className="icon" />
-          <div className="description">Rainy</div>
-          <div className="humidity">Humidity 60%</div>
-          <div className="windspeed">Wind Speed 6.2km/h</div>
-        </div>
+      <div className="search">
+        <input
+          type="text"
+          className="searchbar"
+          value={city}
+          onChange={handleChange}
+          style={{
+            padding: "10px",
+            fontSize: "16px",
+            borderRadius: "4px",
+            border: "1px solid #ccc",
+            marginRight: "10px",
+          }}
+        />
+        <button
+          onClick={handleSearch}
+          style={{
+            padding: "10px 20px",
+            fontSize: "16px",
+            borderRadius: "4px",
+            border: "none",
+            backgroundColor: "#007BFF",
+            color: "white",
+            cursor: "pointer",
+          }}
+        >
+          Search
+        </button>
+      </div>
+      <div className="weather">
+        <h2 className="city">Weather in {name}</h2>
+        <h1 className="temp">{temp}° C</h1>
+        <h3 className="max_temp">Max Temp: {temp_max}° C</h3>
+        <h3 className="min_temp">Min Temp: {temp_min}° C</h3>
+        <img
+          className="icon"
+          src={`https://openweathermap.org/img/wn/${icon}.png`}
+          alt="weather icon"
+        />
+        <p className="description">{description}</p>
+        <p className="humidity">Humidity: {humidity}%</p>
+        <p className="windspeed">Wind Speed: {speed} km/h</p>
       </div>
     </>
   );
-}
+};
 
-export default App;
+export default Weather;
